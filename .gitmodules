@@ -1,0 +1,3 @@
+[submodule "HairStep"]
+	path = HairStep
+	url = https://github.com/GAP-LAB-CUHK-SZ/HairStep.git
