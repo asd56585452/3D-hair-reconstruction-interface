@@ -1,0 +1,12 @@
+#version 330 core
+
+uniform vec3 tint;
+
+out vec4 color;
+in vec4 nc;
+
+void main()
+{
+    vec4 light = normalize(vec4(0,1,-2,0));
+    color = vec4(tint*max(dot(light, nc)*0.05+0.95,0.0), 1.0);
+}
