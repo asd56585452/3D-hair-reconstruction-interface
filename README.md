@@ -29,9 +29,18 @@ pip install pyrr
 pip install PyOpenGL
 cp -r HairStepCpuPatch/* HairStep
 cd grid_less
-
-python grid_slicer.py
   ```
+接著去HairStep的github下載模型檔案
+
+下載 [SAM](https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth) 的 checkpoint 並放在 ./HairStep/checkpoints/SAM-models/. 
+
+下載 [3D networks](https://drive.google.com/file/d/1-akuukaYYtJDta24AAqVdgUOGte4EmQf/view?usp=drive_link) 的 checkpoint 並放在 ./HairStep/checkpoints/recon3D/.
+
+之後靠以下命令執行。(記得要在./grid_less/資料夾下執行指令)
+```
+python grid_slicer.py
+```
+
 Code is tested on Ubuntu 24.04 LTS.
 
 如果執行"sh ./build.sh"時遇到"ld"的報錯，anaconda3/envs/hairstep/compiler_compat/ld可能有問題，刪掉它。參考
