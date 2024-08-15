@@ -1,5 +1,7 @@
 # 頭髮重建系統:利用HairStep從圖片生成頭髮並輸出成可編輯和應用的檔案 
 
+## 需求
+anaconda 3、Blender 4.3
 
 ## 安裝 & 執行
   ```
@@ -21,7 +23,7 @@ sh ./build.sh
 cd ../../
 cd ..
 
-rm -r results
+rm -r HairStep/results
 pip install PyQt6==6.2.3
 pip install pyrr
 pip install PyOpenGL
