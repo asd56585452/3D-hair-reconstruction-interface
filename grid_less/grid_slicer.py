@@ -1,13 +1,14 @@
 import sys
 from PyQt6.QtGui import (QAction, QPixmap, QImage)
-from PyQt6.QtCore import (QSize, Qt)
+from PyQt6.QtCore import (QSize, QThread, pyqtSignal, Qt)
 from PyQt6.QtWidgets import (
   QApplication, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QLabel, QLineEdit,
-  QPushButton, QFileDialog
+  QPushButton, QFileDialog, QStackedLayout
 )
 
 import gl_widgets
 import canvas
+import threadmask
 import torch
 import cv2
 import numpy as np
@@ -24,6 +25,18 @@ from sklearn.cluster import KMeans
 import CustomColorPicker
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
+class Worker(QThread):
+    finished = pyqtSignal()
+
+    def __init__(self, code, parent=None):
+        super().__init__(parent)
+        self.subprocess_code = code
+
+    def run(self):
+        subprocess.run(self.subprocess_code, shell=True)
+        self.finished.emit()  # 發射完成信號
+
 class Parameter(QWidget):
 
 
@@ -100,8 +113,23 @@ class Window(QMainWindow):
     self.main_layout.addWidget(self.parameter_frame)
     self.main_widget = QWidget()
     self.main_widget.setLayout(self.main_layout)
+    
+    # 使用 QStackedLayout 來疊加主窗口和遮罩
+    self.stacked_layout = QStackedLayout()
+    self.stacked_layout.addWidget(self.main_widget)  # 主視窗內容
 
-    self.setCentralWidget(self.main_widget)
+    # 創建並添加遮罩視窗
+    self.tmask = threadmask.Mask(self)
+    self.stacked_layout.addWidget(self.tmask)
+
+    # 初始化時隱藏遮罩
+    self.tmask.hide()
+
+    main_container = QWidget()
+    main_container.setLayout(self.stacked_layout)
+    self.setCentralWidget(main_container)
+  def resizeEvent(self, event):
+    self.tmask.resize(self.main_widget.width(),self.main_widget.height())
   
   def createMenu(self):
 
@@ -140,6 +168,8 @@ class Window(QMainWindow):
     self.color_picker_weight.setColor(self.color_picker_weight.rgb_to_hex(color[0],color[1],color[2]))
     return
   def update_hair(self):
+    self.file_menu.setEnabled(False)
+    self.tmask.show()
     if os.path.exists("../HairStep/results/real_imgs/lmk"):
         shutil.rmtree("../HairStep/results/real_imgs/lmk")
     if os.path.exists("../HairStep/results/real_imgs/lmk_proj"):
@@ -150,9 +180,13 @@ class Window(QMainWindow):
         shutil.rmtree("../HairStep/results/real_imgs/hair3D")
     if os.path.exists("../HairStep/results/real_imgs/mesh"):
         shutil.rmtree("../HairStep/results/real_imgs/mesh")
-    subprocess.run('cd .. && cd HairStep && python scripts/get_lmk.py --device cpu ', shell=True)
-    subprocess.run('cd .. && cd HairStep && python -m scripts.opt_cam --device cpu ', shell=True)
-    subprocess.run('cd .. && cd HairStep && python -m scripts.recon3D --device cpu', shell=True)
+    self.thread = Worker('cd .. && cd HairStep && python scripts/get_lmk.py --device cpu && python -m scripts.opt_cam --device cpu && python -m scripts.recon3D --device cpu')
+    self.thread.finished.connect(self.update_hair_finish)
+    self.thread.start()
+    #subprocess.run('cd .. && cd HairStep && python scripts/get_lmk.py --device cpu ', shell=True)
+    #subprocess.run('cd .. && cd HairStep && python -m scripts.opt_cam --device cpu ', shell=True)
+    #subprocess.run('cd .. && cd HairStep && python -m scripts.recon3D --device cpu', shell=True)
+  def update_hair_finish(self):
     self.main_layout.removeWidget(self.image_frame)
     self.image_frame.deleteLater()
     line_set = o3d.io.read_line_set("../HairStep/results/real_imgs/hair3D/grid.ply")
@@ -160,12 +194,15 @@ class Window(QMainWindow):
     self.main_layout.insertWidget(1, self.image_frame)
     self.color_picker_weight.image_frame = self.image_frame
     self.col_mask()
+    self.tmask.hide()
+    self.file_menu.setEnabled(True)
   def blender_hair(self):
     color = self.color_picker_weight.color/255.0
     subprocess.run('blender --python blender/script.py -- '+str(color[0])+' '+str(color[1])+' '+str(color[2])+'', shell=True)
     return
   def importImages(self):
-  
+    self.file_menu.setEnabled(False)
+    self.tmask.show()
     filename = QFileDialog.getOpenFileName(self)
     if len(filename[0]) > 0:
         self.input_qpixmap.load(filename[0])
@@ -177,13 +214,18 @@ class Window(QMainWindow):
         imgr=cv2.imread(filename[0])
         cv2.imwrite('../HairStep/results/real_imgs/img/grid.png', imgr)
         
-        subprocess.run('cd .. && cd HairStep && python -m scripts.img2hairstep --device cpu', shell=True)
-        
-        self.main_layout.removeWidget(self.mask_label)
-        self.mask_label.deleteLater()
-        self.mask_label = canvas.Canvas('../HairStep/results/real_imgs/resized_img/grid.png', '../HairStep/results/real_imgs/seg/grid.png')
-        self.main_layout.insertWidget(0, self.mask_label)
-        self.col_mask()
+        self.thread = Worker('cd .. && cd HairStep && python -m scripts.img2hairstep --device cpu')
+        self.thread.finished.connect(self.importImages_finish)
+        self.thread.start()
+        # subprocess.run('cd .. && cd HairStep && python -m scripts.img2hairstep --device cpu', shell=True)
+  def importImages_finish(self):
+    self.main_layout.removeWidget(self.mask_label)
+    self.mask_label.deleteLater()
+    self.mask_label = canvas.Canvas('../HairStep/results/real_imgs/resized_img/grid.png', '../HairStep/results/real_imgs/seg/grid.png')
+    self.main_layout.insertWidget(0, self.mask_label)
+    self.col_mask()
+    self.tmask.hide()
+    self.file_menu.setEnabled(True)
 
 app = QApplication(sys.argv)
 window = Window()
