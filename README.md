@@ -1,4 +1,4 @@
-# 頭髮重建系統:利用HairStep從圖片生成頭髮並輸出成可編輯和應用的檔案 
+# 3D strand-base 頭髮生成及編輯系統:利用HairStep從圖片生成頭髮並輸出成可編輯和應用的檔案 
 
 ## 需求
 anaconda 3、Blender 4.3
