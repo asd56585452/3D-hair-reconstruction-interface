@@ -1,10 +1,10 @@
-# 3D strand-base 頭髮生成及編輯系統:利用HairStep從圖片生成頭髮並輸出成可編輯和應用的檔案 
+# 3D Strand-Based Hair Generation and Editing System: Using HairStep to Generate Hair from Images and Export Editable and Applicable Files
 
-## 需求
-anaconda 3、Blender 4.3
+## Requirements
+Anaconda 3, Blender 4.3
 
-## 安裝 & 執行
-  ```
+## Installation & Execution
+```
 git clone --recursive https://github.com/asd56585452/3D-hair-reconstruction-interface.git
 
 cd 3D-hair-reconstruction-interface
@@ -29,26 +29,25 @@ pip install pyrr
 pip install PyOpenGL
 cp -r HairStepCpuPatch/* HairStep
 cd grid_less
-  ```
-接著去HairStep的github下載模型檔案
+```
 
-下載 [SAM](https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth) 的 checkpoint 並放在 ./HairStep/checkpoints/SAM-models/. 
+Next, download the model files from the HairStep GitHub repository.
 
-下載 [3D networks](https://drive.google.com/file/d/1-akuukaYYtJDta24AAqVdgUOGte4EmQf/view?usp=drive_link) 的 checkpoint 並放在 ./HairStep/checkpoints/recon3D/.
+Download the [SAM](https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth) checkpoint and place it in `./HairStep/checkpoints/SAM-models/`.
 
-之後靠以下命令執行。(記得要在./grid_less/資料夾下執行指令)
+Download the [3D networks](https://drive.google.com/file/d/1-akuukaYYtJDta24AAqVdgUOGte4EmQf/view?usp=drive_link) checkpoint and place it in `./HairStep/checkpoints/recon3D/`.
+
+Then, execute the following command (make sure to run the command in the `./grid_less/` folder):
 ```
 python grid_slicer.py
 ```
 
-Code is tested on Ubuntu 24.04 LTS.
+The code has been tested on Ubuntu 24.04 LTS.
 
-如果執行"sh ./build.sh"時遇到"ld"的報錯，anaconda3/envs/hairstep/compiler_compat/ld可能有問題，刪掉它。參考
-https://github.com/ninia/jep/issues/446
-和
-https://github.com/ContinuumIO/anaconda-issues/issues/11152
+If you encounter an "ld" error while running "sh ./build.sh", it could be due to an issue with `anaconda3/envs/hairstep/compiler_compat/ld`. You can delete it. Refer to:
+- https://github.com/ninia/jep/issues/446
+- https://github.com/ContinuumIO/anaconda-issues/issues/11152
 
-## demo和使用範例
+## Demo and Usage Examples
 
-https://drive.google.com/drive/folders/1_6hng2yhaZRj3WhFUzHleKHKf7HK7atU?usp=sharing
-
+[Google Drive link](https://drive.google.com/drive/folders/1_6hng2yhaZRj3WhFUzHleKHKf7HK7atU?usp=sharing)
