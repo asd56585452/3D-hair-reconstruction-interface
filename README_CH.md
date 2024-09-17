@@ -14,7 +14,7 @@ cd HairStep
 conda env create -f environment.yml
 conda activate hairstep
 
-pip install torch==1.9.0+cu111 torchvision==0.10.0+cu111 -f https://download.pytorch.org/whl/torch_stable.html
+pip install torch==1.9.0+cpu torchvision==0.10.0+cpu torchaudio==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html
 
 pip install -r requirements.txt
 
@@ -29,6 +29,7 @@ pip install pyrr
 pip install PyOpenGL
 cp -r HairStepCpuPatch/* HairStep
 cd grid_less
+sudo apt-get install libxcb-cursor0
   ```
 接著去HairStep的github下載模型檔案
 
