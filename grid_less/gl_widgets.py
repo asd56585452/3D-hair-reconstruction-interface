@@ -68,7 +68,7 @@ class ImageFrame(QOpenGLWidget):
         self.hair_lineset_vao = glGenVertexArrays(1)
         print("load",self.hair_lineset_vao)
         lines=np.asarray(line_set.lines)
-        points=np.asarray(line_set.points)
+        points=np.asarray(line_set.points)+[0,0.01,0]
         index = lines.reshape(-1)
         self.start_hair = [0]
         self.count_hair = []
